@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: an anthropometry worksheet. Two specimen plates (A/B) on top, verdict + radar, then the measurement ledger. */
+/* Layout: an anthropometry worksheet. Two specimen plates (A/B), analysis settings, verdict + radar, model comparison, then the measurement ledger. */
 :root{
   --bg:#edf0f2; --surface:#ffffff; --surface2:#f6f8f9; --ink:#16202a; --muted:#5a6a78; --line:#d2dae1;
   --a:#1b5cc8; --a-soft:rgba(27,92,200,.12); --b:#d8571a; --b-soft:rgba(216,87,26,.12);
@@ -26,24 +26,26 @@
   --a:#6f9fff; --a-soft:rgba(111,159,255,.16); --b:#ff9150; --b-soft:rgba(255,145,80,.16);
   --good:#40c085; --mid:#e2ad3e; --bad:#f06b5b; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px}
 .wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;border-bottom:2px solid var(--ink);padding-bottom:14px}
 h1{font-family:var(--f-display);font-weight:900;font-size:clamp(26px,4vw,38px);line-height:1.15;margin:0;letter-spacing:.02em;text-wrap:balance}
 h1 small{display:block;font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.14em;color:var(--muted);margin-bottom:6px}
-.status{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--mid)}
+.engines{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.engines span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mid);flex:none}
 .dot.ok{background:var(--good)} .dot.err{background:var(--bad)}
 h2{font-family:var(--f-display);font-weight:700;font-size:19px;margin:0 0 12px;display:flex;align-items:baseline;gap:10px;text-wrap:balance}
 h2 .tag{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.12em;color:var(--muted)}
 .muted{color:var(--muted)}
-button,.btn{font:inherit;font-size:13.5px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:7px 14px;cursor:pointer}
-button:hover,.btn:hover{border-color:var(--muted)}
-button:focus-visible,.btn:focus-visible,input:focus-visible,.drop:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+button{font:inherit;font-size:13.5px;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:7px 14px;cursor:pointer}
+button:hover{border-color:var(--muted)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,.drop:focus-visible{outline:2px solid var(--a);outline-offset:2px}
 button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
-/* plates */
 .plates{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media (max-width:680px){.plates{grid-template-columns:1fr}}
 .plate{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -62,7 +64,12 @@ button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:v
 .pstat.warn{color:var(--mid)} .pstat.err{color:var(--bad)}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 
-/* verdict */
+.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px 24px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.setting{display:flex;flex-direction:column;gap:8px;min-width:0}
+.setting .lbl{font-size:12px;font-weight:500;letter-spacing:.08em;color:var(--muted)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.setting .hint{font-size:12.5px;color:var(--muted);margin:0}
+
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px}
 .verdict{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:center}
 @media (max-width:760px){.verdict{grid-template-columns:1fr}}
@@ -72,7 +79,7 @@ button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:v
 .pill{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;border:1.5px solid currentColor}
 .c-good{color:var(--good)} .c-mid{color:var(--mid)} .c-bad{color:var(--bad)}
 .parts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
-.part{border-top:1px solid var(--line);padding-top:8px}
+.part{border-top:1px solid var(--line);padding-top:8px;min-width:0}
 .part .k{font-size:12.5px;color:var(--muted)}
 .part .v{font-family:var(--f-mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
 .part .s{font-size:12px;color:var(--muted)}
@@ -88,6 +95,19 @@ button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:v
 .bar{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
 .bar b{display:block;height:100%;border-radius:3px}
 
+.models{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:start}
+@media (max-width:640px){.models{grid-template-columns:1fr}}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) 72px;gap:4px 14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow .mn{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mrow .mn em{font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;padding:1px 7px;border-radius:99px;background:var(--ink);color:var(--bg)}
+.mrow .md{font-size:12.5px;color:var(--muted);grid-column:1}
+.mrow .mv{font-family:var(--f-mono);font-size:22px;font-weight:600;text-align:right;grid-row:1/3;grid-column:2;font-variant-numeric:tabular-nums}
+.mrow .bar{grid-column:1/3}
+.crops{display:flex;gap:10px}
+.crops figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.crops canvas{width:96px;height:96px;border-radius:6px;background:var(--surface2);display:block}
+
 .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media (max-width:760px){.two{grid-template-columns:1fr}}
 .list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
@@ -97,7 +117,6 @@ button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:v
 .list .t{font-weight:700;font-size:14.5px}
 .list .d{font-size:13px;color:var(--muted)}
 
-/* overlay */
 .ov{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
 @media (max-width:760px){.ov{grid-template-columns:1fr}}
 .ovbox{background:#000;border-radius:8px;overflow:hidden;aspect-ratio:1/1;max-width:100%}
@@ -107,7 +126,6 @@ button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:v
 .legend span::before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:var(--c)}
 input[type=range]{width:100%;accent-color:var(--ink)}
 
-/* ledger */
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
 th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -118,24 +136,24 @@ tr.grp td{background:var(--surface2);font-weight:700;font-size:14px}
 tr.grp td .n2{font-family:var(--f-mono);font-weight:600;float:right}
 td .bar{width:110px;display:inline-block;vertical-align:middle;margin-right:8px}
 .sub{font-size:12px;color:var(--muted);display:block}
+.new{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--a);margin-left:6px}
 
-.notes{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px;max-width:72ch}
+.notes{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px;max-width:76ch}
 .notes p{margin:0}
 .placeholder{padding:28px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:10px;background:var(--surface)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
-
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1><small>FACIAL FEATURE COMPARISON</small>顔パーツ照合ラボ</h1>
-    <div class="status" id="mstat"><span class="dot"></span><span>モデルを読み込み中…</span></div>
+    <div class="engines" id="engines" aria-live="polite"></div>
   </header>
 
   <section class="plates">
     <div class="plate" data-k="a">
-      <div class="plate-h"><span class="badge"><i>A</i>顔 A</span><span class="row"><button id="clrA" hidden>削除</button></span></div>
+      <div class="plate-h"><span class="badge"><i>A</i>顔 A</span><button id="clrA" hidden>削除</button></div>
       <label class="drop" id="dropA" tabindex="0">
         <div class="empty" id="emptyA">
           <svg viewBox="0 0 100 120" fill="none" stroke="currentColor" stroke-width="2"><path d="M50 8c-22 0-36 16-36 40 0 30 16 58 36 58s36-28 36-58C86 24 72 8 50 8z"/><path d="M30 46c5-4 11-4 15 0M55 46c4-4 10-4 15 0" stroke-linecap="round"/><circle cx="37" cy="54" r="3" fill="currentColor"/><circle cx="63" cy="54" r="3" fill="currentColor"/><path d="M50 58v16l-5 3M40 88c6 4 14 4 20 0" stroke-linecap="round"/></svg>
@@ -145,10 +163,10 @@ td .bar{width:110px;display:inline-block;vertical-align:middle;margin-right:8px}
         <canvas id="cvA" hidden></canvas>
         <input type="file" id="fileA" accept="image/*" hidden>
       </label>
-      <div class="pstat" id="statA">正面を向いた顔写真がおすすめです</div>
+      <div class="pstat" id="statA"></div>
     </div>
     <div class="plate" data-k="b">
-      <div class="plate-h"><span class="badge"><i>B</i>顔 B</span><span class="row"><button id="clrB" hidden>削除</button></span></div>
+      <div class="plate-h"><span class="badge"><i>B</i>顔 B</span><button id="clrB" hidden>削除</button></div>
       <label class="drop" id="dropB" tabindex="0">
         <div class="empty" id="emptyB">
           <svg viewBox="0 0 100 120" fill="none" stroke="currentColor" stroke-width="2"><path d="M50 10c-24 0-38 18-38 42 0 28 18 54 38 54s38-26 38-54c0-24-14-42-38-42z"/><path d="M29 47c5-3 11-3 15 0M56 47c4-3 10-3 15 0" stroke-linecap="round"/><circle cx="37" cy="55" r="3" fill="currentColor"/><circle cx="63" cy="55" r="3" fill="currentColor"/><path d="M50 59v14l-6 3M39 87c7 3 15 3 22 0" stroke-linecap="round"/></svg>
@@ -158,18 +176,41 @@ td .bar{width:110px;display:inline-block;vertical-align:middle;margin-right:8px}
         <canvas id="cvB" hidden></canvas>
         <input type="file" id="fileB" accept="image/*" hidden>
       </label>
-      <div class="pstat" id="statB">A と同じくらいの角度・表情だと精度が上がります</div>
+      <div class="pstat" id="statB"></div>
     </div>
   </section>
-  <div class="row">
-    <button id="swap">A と B を入れ替え</button>
-    <button id="toggleLm" aria-pressed="true">ランドマーク表示</button>
-  </div>
+
+  <section class="settings" aria-label="分析設定">
+    <div class="setting">
+      <span class="lbl">顔認識 AI モデル（総合点の 60%）</span>
+      <div class="seg" role="group" aria-label="顔認識 AI モデル">
+        <button data-rec="arc" aria-pressed="true">InsightFace</button>
+        <button data-rec="dlib" aria-pressed="false">dlib</button>
+        <button data-rec="avg" aria-pressed="false">2 つの平均</button>
+      </div>
+      <p class="hint" id="recHint"></p>
+    </div>
+    <div class="setting">
+      <span class="lbl">顔ランドマーク（パーツ計測、総合点の 40%）</span>
+      <div class="seg" role="group" aria-label="顔ランドマーク">
+        <button data-lm="mp" aria-pressed="true">478 点 MediaPipe</button>
+        <button data-lm="fa" aria-pressed="false">68 点 face-api</button>
+      </div>
+      <p class="hint" id="lmHint"></p>
+    </div>
+    <div class="setting">
+      <span class="lbl">表示</span>
+      <div class="seg">
+        <button id="swap">A と B を入れ替え</button>
+        <button id="toggleLm" aria-pressed="true">ランドマーク表示</button>
+      </div>
+    </div>
+  </section>
 
   <div id="placeholder" class="placeholder">2 枚の顔画像を入れると、総合一致率・パーツ別スコア・計測値の比較がここに表示されます。<br>画像はこのブラウザ内だけで処理され、どこにも送信されません。</div>
 
   <div id="results" hidden>
-    <div class="wrap" style="gap:28px">
+    <div class="wrap">
       <section class="card">
         <div class="verdict">
           <div>
@@ -177,13 +218,25 @@ td .bar{width:110px;display:inline-block;vertical-align:middle;margin-right:8px}
             <div class="big"><span class="num" id="total">--<sup>%</sup></span><span class="pill" id="verdictPill">--</span></div>
             <p class="muted" id="verdictText" style="margin:12px 0 0;max-width:52ch"></p>
             <div class="parts">
-              <div class="part"><div class="k">AI 顔特徴の類似度（重み 60%）</div><div class="v" id="aiScore">--</div><div class="s" id="aiDist"></div></div>
-              <div class="part"><div class="k">パーツ形状の一致度（重み 40%）</div><div class="v" id="geoScore">--</div><div class="s">ランドマーク 68 点・計測 26 項目</div></div>
+              <div class="part"><div class="k">AI 顔認識の類似度（60%）</div><div class="v" id="aiScore">--</div><div class="s" id="aiSub"></div></div>
+              <div class="part"><div class="k">パーツ形状の一致度（40%）</div><div class="v" id="geoScore">--</div><div class="s" id="geoSub"></div></div>
             </div>
           </div>
           <svg class="radar" id="radar" viewBox="0 0 380 340" role="img" aria-label="パーツ別一致率のレーダーチャート"></svg>
         </div>
         <div class="regions" id="regions"></div>
+      </section>
+
+      <section class="card">
+        <h2>AI モデルの比較 <span class="tag">RECOGNITION MODELS</span></h2>
+        <div class="models">
+          <div id="modelRows"></div>
+          <div class="crops" id="crops">
+            <figure><canvas id="cropA" width="112" height="112"></canvas>A</figure>
+            <figure><canvas id="cropB" width="112" height="112"></canvas>B</figure>
+          </div>
+        </div>
+        <p class="muted" style="font-size:12.5px;margin:10px 0 0">右の 2 枚は InsightFace に渡している顔画像です。目・鼻・口角の 5 点で位置合わせし、112×112 ピクセルに切り出しています。</p>
       </section>
 
       <section class="two">
@@ -207,14 +260,14 @@ td .bar{width:110px;display:inline-block;vertical-align:middle;margin-right:8px}
           <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
             <div class="ovbox light"><canvas id="shape" width="720" height="720"></canvas></div>
             <div class="legend"><span style="--c:var(--a)">A の輪郭線</span><span style="--c:var(--b)">B の輪郭線（位置・大きさ・傾きを A に合わせて補正）</span></div>
-            <p class="muted" style="font-size:13px;margin:0">両目の位置を基準に揃えています。線のずれが大きい部分ほど形が違います。</p>
+            <p class="muted" style="font-size:13px;margin:0">灰色の細い線は、同じ点どうしのずれです。長いほど形が違います。</p>
           </div>
         </div>
       </section>
 
       <section class="card">
         <h2>計測値の詳細 <span class="tag">MEASUREMENTS</span></h2>
-        <p class="muted" style="font-size:13px;margin:0 0 12px">長さは両目の中心間の距離を 1.00 とした比率です。顔の大きさや写真の解像度に左右されません。</p>
+        <p class="muted" style="font-size:13px;margin:0 0 12px">長さは両目の中心間の距離を 1.00 とした比率です。顔の大きさや写真の解像度に左右されません。<span class="new" style="margin:0">478点</span> の付いた項目は 478 点モードでだけ測れます。</p>
         <div class="tbl-wrap"><table>
           <thead><tr><th>項目</th><th style="text-align:right">A</th><th style="text-align:right">B</th><th style="text-align:right">差</th><th>一致度</th></tr></thead>
           <tbody id="ledger"></tbody>
@@ -224,40 +277,87 @@ td .bar{width:110px;display:inline-block;vertical-align:middle;margin-right:8px}
   </div>
 
   <section class="notes">
-    <p><b>仕組み：</b>face-api.js で顔を検出し、68 点の顔ランドマークと 128 次元の顔特徴ベクトルを取り出します。特徴ベクトルの距離を「AI 顔特徴の類似度」に、ランドマークから測った輪郭・目・眉・鼻・口の比率と形（プロクラステス解析）を「パーツ形状の一致度」にしています。</p>
+    <p><b>仕組み：</b>顔の検出は face-api.js、ランドマークは MediaPipe Face Landmarker（478 点）か face-api.js（68 点）、顔認識は InsightFace の MobileFaceNet（512 次元）か dlib 系の ResNet（128 次元）を使います。ランドマークから測った輪郭・目・眉・鼻・口の比率と形（プロクラステス解析）を「パーツ形状の一致度」、顔認識モデルの特徴ベクトルの近さを「AI 顔認識の類似度」にしています。</p>
     <p><b>精度について：</b>顔の向き・表情・レンズの歪み・髪で隠れた輪郭で結果は変わります。見た目の似ている度合いを楽しむための目安で、本人確認や血縁の判定には使えません。</p>
   </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.3/dist/ort.min.js"></script>
 <script>
 (() => {
+const ASSETS = {
+  faceapi: 'models/faceapi',
+  mpBundle: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs',
+  mpLoader: 'models/mediapipe/vision_wasm_internal.js',
+  mpWasm: 'models/mediapipe/vision_wasm_internal.wasm',
+  mpTask: 'models/mediapipe/face_landmarker.task',
+  arcface: 'models/insightface/w600k_mbf.onnx',
+  ortDir: 'models/ort/',
+};
+
 const $ = id => document.getElementById(id);
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const range = (a, b) => Array.from({length: b - a}, (_, i) => a + i);
+const range = (a, b) => Array.from({ length: b - a }, (_, i) => a + i);
+const avg = (...v) => v.reduce((s, x) => s + x, 0) / v.length;
+const mean = (P, idx) => { let x = 0, y = 0, z = 0; for (const i of idx) { x += P[i].x; y += P[i].y; z += P[i].z || 0; } const n = idx.length; return { x: x / n, y: y / n, z: z / n }; };
+const mid2 = (p, q) => ({ x: (p.x + q.x) / 2, y: (p.y + q.y) / 2, z: ((p.z || 0) + (q.z || 0)) / 2 });
+const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
+const deg = r => r * 180 / Math.PI;
 
-let modelsReady = false;
-const S = { a: null, b: null }; // {canvas, det, norm}
+/* ---------- engines ---------- */
+const ENG = { fa: 'loading', mp: 'loading', arc: 'loading' };
+const ENG_NAME = { fa: '顔検出 face-api', mp: '478点 MediaPipe', arc: 'InsightFace' };
+let mpLm = null, mpVision = null, arcSess = null;
+const set = { rec: 'arc', lm: 'mp' };
+const S = { a: null, b: null };
 let showLm = true, blendMode = 'blend';
 
-/* ---------- model loading ---------- */
-async function loadModels() {
-  const st = $('mstat');
+function renderEngines() {
+  $('engines').innerHTML = Object.keys(ENG).map(k => `<span><i class="dot ${ENG[k] === 'ok' ? 'ok' : ENG[k] === 'err' ? 'err' : ''}"></i>${ENG_NAME[k]}${ENG[k] === 'loading' ? ' 読み込み中' : ENG[k] === 'err' ? ' 利用不可' : ''}</span>`).join('');
+  document.querySelector('[data-rec="arc"]').disabled = ENG.arc === 'err';
+  document.querySelector('[data-rec="avg"]').disabled = ENG.arc === 'err';
+  document.querySelector('[data-lm="mp"]').disabled = ENG.mp === 'err';
+  if (ENG.arc === 'err' && set.rec !== 'dlib') pick('rec', 'dlib');
+  if (ENG.mp === 'err' && set.lm !== 'fa') pick('lm', 'fa');
+}
+async function engineReady(k) { renderEngines(); for (const s of ['a', 'b']) if (S[s]?.fa) await enrich(s); }
+
+async function loadFaceApi() {
   try {
     try { await faceapi.tf.setBackend('webgl'); } catch (e) { await faceapi.tf.setBackend('cpu'); }
     await faceapi.tf.ready();
     await Promise.all([
-      faceapi.nets.ssdMobilenetv1.loadFromUri('model'),
-      faceapi.nets.faceLandmark68Net.loadFromUri('model'),
-      faceapi.nets.faceRecognitionNet.loadFromUri('model'),
+      faceapi.nets.ssdMobilenetv1.loadFromUri(ASSETS.faceapi),
+      faceapi.nets.faceLandmark68Net.loadFromUri(ASSETS.faceapi),
+      faceapi.nets.faceRecognitionNet.loadFromUri(ASSETS.faceapi),
     ]);
-    modelsReady = true;
-    st.innerHTML = '<span class="dot ok"></span><span>準備完了 ・ 端末内で処理</span>';
-    for (const k of ['a', 'b']) if (S[k] && !S[k].det) await detect(k);
-  } catch (e) {
-    console.error(e);
-    st.innerHTML = '<span class="dot err"></span><span>モデルを読み込めませんでした。ページを再読み込みしてください</span>';
-  }
+    ENG.fa = 'ok';
+    for (const k of ['a', 'b']) if (S[k] && !S[k].fa) await detect(k);
+  } catch (e) { console.error(e); ENG.fa = 'err'; }
+  renderEngines();
+}
+async function loadMediaPipe() {
+  try {
+    mpVision = await import(ASSETS.mpBundle);
+    const buf = new Uint8Array(await (await fetch(ASSETS.mpTask)).arrayBuffer());
+    mpLm = await mpVision.FaceLandmarker.createFromOptions(
+      { wasmLoaderPath: new URL(ASSETS.mpLoader, location.href).href, wasmBinaryPath: new URL(ASSETS.mpWasm, location.href).href },
+      { baseOptions: { modelAssetBuffer: buf, delegate: 'CPU' }, runningMode: 'IMAGE', numFaces: 4 });
+    buildMpSets();
+    ENG.mp = 'ok';
+  } catch (e) { console.error(e); ENG.mp = 'err'; }
+  await engineReady('mp');
+}
+async function loadArcFace() {
+  try {
+    ort.env.wasm.wasmPaths = new URL(ASSETS.ortDir, location.href).href;
+    ort.env.wasm.numThreads = 1;
+    const buf = new Uint8Array(await (await fetch(ASSETS.arcface)).arrayBuffer());
+    arcSess = await ort.InferenceSession.create(buf, { executionProviders: ['wasm'] });
+    ENG.arc = 'ok';
+  } catch (e) { console.error(e); ENG.arc = 'err'; }
+  await engineReady('arc');
 }
 
 /* ---------- image input ---------- */
@@ -273,14 +373,14 @@ function setupSlot(k) {
     const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/'));
     if (f) loadFile(k, f);
   });
-  $('clr' + K).addEventListener('click', () => { S[k] = null; renderSlot(k); setStat(k, '画像を削除しました'); update(); });
+  drop.addEventListener('focus', () => lastFocus = k);
+  $('clr' + K).addEventListener('click', () => { S[k] = null; renderSlot(k); update(); });
 }
 let lastFocus = null;
-['a', 'b'].forEach(k => $('drop' + k.toUpperCase()).addEventListener('focus', () => lastFocus = k));
 document.addEventListener('paste', e => {
   const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
   if (!item) return;
-  const k = lastFocus && document.activeElement === $('drop' + lastFocus.toUpperCase()) ? lastFocus : (!S.a ? 'a' : !S.b ? 'b' : 'b');
+  const k = lastFocus && document.activeElement === $('drop' + lastFocus.toUpperCase()) ? lastFocus : (!S.a ? 'a' : 'b');
   loadFile(k, item.getAsFile());
 });
 
@@ -292,163 +392,260 @@ function loadFile(k, f) {
     c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
     URL.revokeObjectURL(url);
-    S[k] = { canvas: c, det: null, norm: null };
+    S[k] = { canvas: c, fa: null, mp: null, emb: null, crop: null, msg: '', nFaces: 0, failed: false };
     renderSlot(k);
-    if (modelsReady) await detect(k); else setStat(k, 'モデルの準備を待っています…');
+    if (ENG.fa === 'ok') await detect(k);
   };
   img.onerror = () => setStat(k, 'この画像は読み込めません。JPEG か PNG を試してください', 'err');
   img.src = url;
 }
-
 function setStat(k, msg, cls = '') { const el = $('stat' + k.toUpperCase()); el.textContent = msg; el.className = 'pstat ' + cls; }
+function refreshStat(k) {
+  const s = S[k];
+  if (!s) return setStat(k, k === 'a' ? '正面を向いた顔写真がおすすめです' : 'A と同じくらいの角度・表情だと精度が上がります');
+  if (s.failed) return setStat(k, '顔が見つかりませんでした。顔が大きく正面に写った画像を試してください', 'err');
+  if (!s.fa) return setStat(k, ENG.fa === 'ok' ? '顔を検出中…' : 'モデルの準備を待っています…');
+  const parts = [`検出 OK（信頼度 ${s.fa.score.toFixed(2)}）`, `68点 ✓`, s.mp ? '478点 ✓' : ENG.mp === 'loading' ? '478点 …' : '478点 ×', s.emb ? 'InsightFace ✓' : ENG.arc === 'loading' ? 'InsightFace …' : 'InsightFace ×'];
+  if (s.nFaces > 1) parts.push(`${s.nFaces} 人中いちばん大きい顔を使用`);
+  const yaw = yawOf(keypoints(normalize(s.fa.pts, 'fa'), 'fa'));
+  if (Math.abs(yaw) > 0.12) { parts.push('顔が横を向いているため精度が落ちます'); return setStat(k, parts.join(' ・ '), 'warn'); }
+  setStat(k, parts.join(' ・ '));
+}
 
 async function detect(k) {
   const s = S[k]; if (!s) return;
-  setStat(k, '顔を検出中…');
+  refreshStat(k);
   await new Promise(r => setTimeout(r, 20));
   const res = await faceapi.detectAllFaces(s.canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.35 }))
     .withFaceLandmarks().withFaceDescriptors();
   if (S[k] !== s) return;
-  if (!res.length) { setStat(k, '顔が見つかりませんでした。顔が大きく正面に写った画像を試してください', 'err'); renderSlot(k); update(); return; }
+  if (!res.length) { s.failed = true; renderSlot(k); update(); return; }
   res.sort((p, q) => q.detection.box.area - p.detection.box.area);
   const d = res[0];
-  s.det = { pts: d.landmarks.positions.map(p => ({ x: p.x, y: p.y })), desc: d.descriptor, score: d.detection.score, box: d.detection.box };
-  s.norm = normalize(s.det.pts);
-  const yaw = yawOf(s.norm);
-  let msg = `検出 OK ・ 信頼度 ${d.detection.score.toFixed(2)}`;
-  if (res.length > 1) msg += ` ・ ${res.length} 人中いちばん大きい顔を使用`;
-  if (Math.abs(yaw) > 0.12) { msg += ' ・ 顔が横を向いているため精度が落ちます'; setStat(k, msg, 'warn'); }
-  else setStat(k, msg);
+  s.nFaces = res.length;
+  s.fa = { pts: d.landmarks.positions.map(p => ({ x: p.x, y: p.y, z: 0 })), desc: d.descriptor, score: d.detection.score, box: d.detection.box };
   renderSlot(k); update();
+  await enrich(k);
+}
+// add the optional engines' results (MediaPipe landmarks, InsightFace embedding) once they are available
+async function enrich(k) {
+  const s = S[k]; if (!s?.fa) return;
+  let changed = false;
+  if (ENG.mp === 'ok' && !s.mp) {
+    try {
+      const r = mpLm.detect(s.canvas), W = s.canvas.width, H = s.canvas.height, b = s.fa.box;
+      const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+      let best = null, bd = Infinity;
+      for (const f of r.faceLandmarks || []) {
+        const c = f.reduce((a, p) => ({ x: a.x + p.x * W / f.length, y: a.y + p.y * H / f.length }), { x: 0, y: 0 });
+        const dd = Math.hypot(c.x - cx, c.y - cy);
+        if (dd < bd) { bd = dd; best = f; }
+      }
+      if (best && bd < b.width * 0.5) { s.mp = best.map(p => ({ x: p.x * W, y: p.y * H, z: p.z * W })); changed = true; }
+    } catch (e) { console.error(e); }
+  }
+  if (ENG.arc === 'ok' && !s.emb) {
+    try { const r = await embedArc(s.canvas, s.fa.pts); if (S[k] !== s) return; s.emb = r.emb; s.crop = r.crop; changed = true; } catch (e) { console.error(e); }
+  }
+  refreshStat(k);
+  if (changed) { renderSlot(k); update(); }
 }
 
-/* ---------- drawing ---------- */
-const CONTOURS = [[range(0, 17), false], [range(17, 22), false], [range(22, 27), false], [range(27, 31), false], [range(31, 36), false],
-  [range(36, 42), true], [range(42, 48), true], [range(48, 60), true], [range(60, 68), true]];
-function strokeContours(ctx, P, color, w, dots) {
-  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  for (const [idx, closed] of CONTOURS) {
-    ctx.beginPath(); idx.forEach((i, n) => n ? ctx.lineTo(P[i].x, P[i].y) : ctx.moveTo(P[i].x, P[i].y));
-    if (closed) ctx.closePath(); ctx.stroke();
-  }
-  ctx.beginPath(); ctx.moveTo(P[30].x, P[30].y); ctx.lineTo(P[33].x, P[33].y); ctx.stroke();
-  if (dots) { ctx.fillStyle = color; for (const p of P) { ctx.beginPath(); ctx.arc(p.x, p.y, w * 1.1, 0, 7); ctx.fill(); } }
-}
-function renderSlot(k) {
-  const K = k.toUpperCase(), s = S[k], cv = $('cv' + K);
-  $('drop' + K).classList.toggle('has', !!s); $('empty' + K).hidden = !!s; cv.hidden = !s; $('clr' + K).hidden = !s;
-  if (!s) { setStat(k, k === 'a' ? '正面を向いた顔写真がおすすめです' : 'A と同じくらいの角度・表情だと精度が上がります'); return; }
-  cv.width = s.canvas.width; cv.height = s.canvas.height;
-  const ctx = cv.getContext('2d'); ctx.drawImage(s.canvas, 0, 0);
-  if (s.det && showLm) {
-    const w = Math.max(1.2, s.det.box.width / 160);
-    strokeContours(ctx, s.det.pts, k === 'a' ? css('--a') : css('--b'), w, true);
-  }
+/* ---------- InsightFace (ArcFace) embedding ---------- */
+const ARC_DST = [[38.2946, 51.6963], [73.5318, 51.5014], [56.0252, 71.7366], [41.5493, 92.3655], [70.7299, 92.2041]];
+async function embedArc(canvas, P) {
+  const [l, r] = [mean(P, range(36, 42)), mean(P, range(42, 48))];
+  const src = [l, r, P[30], P[48], P[54]];
+  const ms = mean(src, range(0, 5)), md = ARC_DST.reduce((a, d) => ({ x: a.x + d[0] / 5, y: a.y + d[1] / 5 }), { x: 0, y: 0 });
+  let num1 = 0, num2 = 0, den = 0;
+  src.forEach((p, i) => {
+    const sx = p.x - ms.x, sy = p.y - ms.y, dx = ARC_DST[i][0] - md.x, dy = ARC_DST[i][1] - md.y;
+    num1 += sx * dx + sy * dy; num2 += sx * dy - sy * dx; den += sx * sx + sy * sy;
+  });
+  const a = num1 / den, b = num2 / den, tx = md.x - (a * ms.x - b * ms.y), ty = md.y - (b * ms.x + a * ms.y);
+  const c = document.createElement('canvas'); c.width = c.height = 112;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.fillStyle = '#000'; x.fillRect(0, 0, 112, 112);
+  x.setTransform(a, b, -b, a, tx, ty); x.drawImage(canvas, 0, 0);
+  const px = x.getImageData(0, 0, 112, 112).data, N = 112 * 112, f = new Float32Array(3 * N);
+  for (let i = 0; i < N; i++) { f[i] = (px[i * 4] - 127.5) / 127.5; f[N + i] = (px[i * 4 + 1] - 127.5) / 127.5; f[2 * N + i] = (px[i * 4 + 2] - 127.5) / 127.5; }
+  const out = await arcSess.run({ [arcSess.inputNames[0]]: new ort.Tensor('float32', f, [1, 3, 112, 112]) });
+  const v = Float32Array.from(out[arcSess.outputNames[0]].data), n = Math.hypot(...v);
+  return { emb: v.map(e => e / n), crop: c };
 }
 
-/* ---------- geometry ---------- */
-const mean = (P, idx) => { let x = 0, y = 0; for (const i of idx) { x += P[i].x; y += P[i].y; } return { x: x / idx.length, y: y / idx.length }; };
-const dist = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
-const eyeCenters = P => [mean(P, range(36, 42)), mean(P, range(42, 48))];
-function normalize(P) {
-  const [l, r] = eyeCenters(P), mid = { x: (l.x + r.x) / 2, y: (l.y + r.y) / 2 };
+/* ---------- landmark models ---------- */
+const FA_EDGES = [];
+[[range(0, 17), 0], [range(17, 22), 0], [range(22, 27), 0], [range(27, 31), 0], [range(31, 36), 0], [range(36, 42), 1], [range(42, 48), 1], [range(48, 60), 1], [range(60, 68), 1]]
+  .forEach(([idx, closed]) => { for (let i = 1; i < idx.length; i++) FA_EDGES.push([idx[i - 1], idx[i]]); if (closed) FA_EDGES.push([idx[idx.length - 1], idx[0]]); });
+FA_EDGES.push([30, 33]);
+const FA_REG = { face: range(0, 17), eyes: range(36, 48), brows: range(17, 27), nose: range(27, 36), mouth: range(48, 68) };
+
+const MP_NOSE = [168, 6, 197, 195, 5, 4, 1, 19, 94, 2, 98, 327, 64, 294, 129, 358];
+let MP_EDGES = [], MP_REG = null, MP_KEYS = [];
+function buildMpSets() {
+  const F = mpVision.FaceLandmarker, pairs = c => c.map(e => [e.start, e.end]), uniq = c => [...new Set(c.flatMap(e => [e.start, e.end]))];
+  MP_EDGES = [F.FACE_LANDMARKS_FACE_OVAL, F.FACE_LANDMARKS_LEFT_EYE, F.FACE_LANDMARKS_RIGHT_EYE, F.FACE_LANDMARKS_LEFT_EYEBROW, F.FACE_LANDMARKS_RIGHT_EYEBROW,
+    F.FACE_LANDMARKS_LIPS, F.FACE_LANDMARKS_LEFT_IRIS, F.FACE_LANDMARKS_RIGHT_IRIS].flatMap(pairs);
+  [168, 6, 197, 195, 5, 4, 1, 2].forEach((v, i, a) => i && MP_EDGES.push([a[i - 1], v]));
+  MP_REG = {
+    face: uniq(F.FACE_LANDMARKS_FACE_OVAL),
+    eyes: uniq([...F.FACE_LANDMARKS_LEFT_EYE, ...F.FACE_LANDMARKS_RIGHT_EYE, ...F.FACE_LANDMARKS_LEFT_IRIS, ...F.FACE_LANDMARKS_RIGHT_IRIS]),
+    brows: uniq([...F.FACE_LANDMARKS_LEFT_EYEBROW, ...F.FACE_LANDMARKS_RIGHT_EYEBROW]),
+    nose: MP_NOSE,
+    mouth: uniq(F.FACE_LANDMARKS_LIPS),
+  };
+  MP_KEYS = [...new Set([...Object.values(MP_REG).flat()])];
+}
+const BROW1 = [70, 63, 105, 66, 107, 46, 53, 52, 65, 55], BROW2 = [300, 293, 334, 296, 336, 276, 283, 282, 295, 285];
+
+function eyeCentersOf(P, model) {
+  return model === 'mp' ? [P[468], P[473]] : [mean(P, range(36, 42)), mean(P, range(42, 48))];
+}
+function normalize(P, model) {
+  const [l, r] = eyeCentersOf(P, model), m = mid2(l, r);
   const ang = Math.atan2(r.y - l.y, r.x - l.x), iod = dist(l, r), c = Math.cos(-ang), s = Math.sin(-ang);
-  return P.map(p => { const x = p.x - mid.x, y = p.y - mid.y; return { x: (x * c - y * s) / iod, y: (x * s + y * c) / iod }; });
+  return P.map(p => { const x = p.x - m.x, y = p.y - m.y; return { x: (x * c - y * s) / iod, y: (x * s + y * c) / iod, z: ((p.z || 0) - m.z) / iod }; });
 }
-function yawOf(N) { return (dist(N[30], N[0]) - dist(N[30], N[16])) / dist(N[0], N[16]); }
-const deg = r => r * 180 / Math.PI;
+// named anatomical points; "1" = left side of the image, "2" = right side
+function keypoints(N, model) {
+  if (model === 'mp') return {
+    e1o: N[33], e1i: N[133], e1t: N[159], e1b: N[145], e2i: N[362], e2o: N[263], e2t: N[386], e2b: N[374],
+    b1o: mid2(N[70], N[46]), b1m: mid2(N[105], N[52]), b1i: mid2(N[107], N[55]),
+    b2i: mid2(N[336], N[285]), b2m: mid2(N[334], N[282]), b2o: mid2(N[300], N[276]),
+    browY: mean(N, [...BROW1, ...BROW2]).y,
+    f1: N[234], f2: N[454], g1: N[58], g2: N[288], j1: N[136], j2: N[365], c1: N[176], c2: N[400], chin: N[152],
+    nas: N[168], tip: N[1], sub: N[2], a1: N[64], a2: N[294],
+    m1: N[61], m2: N[291], lt: N[0], lui: N[13], lli: N[14], lb: N[17],
+  };
+  return {
+    e1o: N[36], e1i: N[39], e1t: mean(N, [37, 38]), e1b: mean(N, [40, 41]), e2i: N[42], e2o: N[45], e2t: mean(N, [43, 44]), e2b: mean(N, [46, 47]),
+    b1o: N[17], b1m: N[19], b1i: N[21], b2i: N[22], b2m: N[24], b2o: N[26], browY: mean(N, range(17, 27)).y,
+    f1: N[0], f2: N[16], g1: N[3], g2: N[13], j1: N[5], j2: N[11], c1: N[6], c2: N[10], chin: N[8],
+    nas: N[27], tip: N[30], sub: N[33], a1: N[31], a2: N[35],
+    m1: N[48], m2: N[54], lt: N[51], lui: N[62], lli: N[66], lb: N[57],
+  };
+}
+const yawOf = K => (dist(K.tip, K.f1) - dist(K.tip, K.f2)) / dist(K.f1, K.f2);
 const angAt = (a, o, b) => { const v1 = { x: a.x - o.x, y: a.y - o.y }, v2 = { x: b.x - o.x, y: b.y - o.y }; return deg(Math.acos((v1.x * v2.x + v1.y * v2.y) / (Math.hypot(v1.x, v1.y) * Math.hypot(v2.x, v2.y)))); };
-const browTop = N => mean(N, range(17, 27)).y;
-const faceH = N => N[8].y - browTop(N);
-const eyeW = (N, side) => side ? dist(N[42], N[45]) : dist(N[36], N[39]);
-const eyeOpen = (N, side) => side ? (dist(N[43], N[47]) + dist(N[44], N[46])) / 2 / eyeW(N, 1) : (dist(N[37], N[41]) + dist(N[38], N[40])) / 2 / eyeW(N, 0);
-function perp(p, a, b) { return ((b.x - a.x) * (a.y - p.y) - (a.x - p.x) * (b.y - a.y)) / dist(a, b); }
-const avg = (...v) => v.reduce((s, x) => s + x, 0) / v.length;
+const perp = (p, a, b) => ((b.x - a.x) * (a.y - p.y) - (a.x - p.x) * (b.y - a.y)) / dist(a, b);
+const fw = K => dist(K.f1, K.f2), fh = K => K.chin.y - K.browY;
+const ew1 = K => dist(K.e1o, K.e1i), ew2 = K => dist(K.e2i, K.e2o), ew = K => avg(ew1(K), ew2(K));
+const mw = K => dist(K.m1, K.m2), bl = K => avg(dist(K.b1o, K.b1i), dist(K.b2i, K.b2o));
 
-// tol: difference that scores ~37/100. kind 'r' = relative ratio diff, 'd' = absolute degrees
+// tol: difference that scores ~37/100. k: 'r' relative ratio diff, 'd' absolute degrees, 'a' absolute value. mp: needs the 478-point mesh
 const MEASURES = [
-  { r: 'face', label: '顔の横幅', sub: '頬骨付近の幅', f: N => dist(N[0], N[16]), tol: .09, k: 'r', hi: '顔の幅が広い', lo: '顔の幅が狭い' },
-  { r: 'face', label: '顔の縦横比', sub: '眉〜あご ÷ 顔幅', f: N => faceH(N) / dist(N[0], N[16]), tol: .08, k: 'r', hi: '面長', lo: '縦が短く丸顔寄り' },
-  { r: 'face', label: 'エラの張り', sub: 'エラ幅 ÷ 顔幅', f: N => dist(N[3], N[13]) / dist(N[0], N[16]), tol: .05, k: 'r', hi: 'エラが張っている', lo: 'エラがすっきり' },
-  { r: 'face', label: 'あごの幅', sub: '下あご幅 ÷ 顔幅', f: N => dist(N[5], N[11]) / dist(N[0], N[16]), tol: .07, k: 'r', hi: 'あごが広い', lo: 'あごが細い' },
-  { r: 'face', label: 'あごの角度', sub: 'あご先の開き角', f: N => angAt(N[6], N[8], N[10]), tol: 9, k: 'd', hi: 'あごが丸く広い', lo: 'あごが尖っている' },
-  { r: 'face', label: '下顔面の長さ', sub: '鼻下〜あご ÷ 顔の高さ', f: N => (N[8].y - N[33].y) / faceH(N), tol: .07, k: 'r', hi: '下顔面が長い', lo: '下顔面が短い' },
-  { r: 'eyes', label: '目の横幅', sub: '目頭〜目尻（左右平均）', f: N => avg(eyeW(N, 0), eyeW(N, 1)), tol: .08, k: 'r', hi: '目が横に大きい', lo: '目が横に小さい' },
-  { r: 'eyes', label: '目の開き', sub: '縦幅 ÷ 横幅', f: N => avg(eyeOpen(N, 0), eyeOpen(N, 1)), tol: .2, k: 'r', hi: '目がぱっちり開いている', lo: '目が細い' },
-  { r: 'eyes', label: '目と目の間隔', sub: '目頭間 ÷ 目の横幅', f: N => dist(N[39], N[42]) / avg(eyeW(N, 0), eyeW(N, 1)), tol: .1, k: 'r', hi: '目の間隔が離れている', lo: '目の間隔が近い' },
-  { r: 'eyes', label: '目尻の角度', sub: '＋ほどつり目', f: N => avg(deg(Math.atan2(N[39].y - N[36].y, N[39].x - N[36].x)), deg(Math.atan2(N[42].y - N[45].y, N[45].x - N[42].x))), tol: 5, k: 'd', hi: 'つり目寄り', lo: 'たれ目寄り' },
-  { r: 'eyes', label: '左右の目の大きさの差', sub: '差 ÷ 平均', f: N => Math.abs(eyeW(N, 0) - eyeW(N, 1)) / avg(eyeW(N, 0), eyeW(N, 1)), tol: .08, k: 'a', hi: '左右の目の大きさの差が大きい', lo: '左右の目がそろっている' },
-  { r: 'brows', label: '眉の長さ', sub: '眉頭〜眉尻', f: N => avg(dist(N[17], N[21]), dist(N[22], N[26])), tol: .09, k: 'r', hi: '眉が長い', lo: '眉が短い' },
-  { r: 'brows', label: '眉と目の距離', sub: '眉の中央〜上まぶた', f: N => avg(mean(N, [37, 38]).y - mean(N, [18, 19, 20]).y, mean(N, [43, 44]).y - mean(N, [23, 24, 25]).y), tol: .2, k: 'r', hi: '眉と目が離れている', lo: '眉と目が近い' },
-  { r: 'brows', label: '眉のアーチ', sub: '山の高さ ÷ 長さ', f: N => avg(perp(N[19], N[17], N[21]), perp(N[24], N[22], N[26])) / avg(dist(N[17], N[21]), dist(N[22], N[26])), tol: .4, k: 'r', hi: '眉が弧を描いている', lo: '眉がまっすぐ' },
-  { r: 'brows', label: '眉の角度', sub: '＋ほど眉尻が上がる', f: N => avg(deg(Math.atan2(N[21].y - N[17].y, N[21].x - N[17].x)), deg(Math.atan2(N[22].y - N[26].y, N[26].x - N[22].x))), tol: 6, k: 'd', hi: '眉尻が上がっている', lo: '眉尻が下がっている' },
-  { r: 'brows', label: '眉間の広さ', sub: '眉頭どうしの距離', f: N => dist(N[21], N[22]), tol: .16, k: 'r', hi: '眉間が広い', lo: '眉間が狭い' },
-  { r: 'nose', label: '鼻の長さ', sub: '鼻根〜鼻下 ÷ 顔の高さ', f: N => dist(N[27], N[33]) / faceH(N), tol: .08, k: 'r', hi: '鼻が長い', lo: '鼻が短い' },
-  { r: 'nose', label: '小鼻の幅', sub: '小鼻の両端', f: N => dist(N[31], N[35]), tol: .1, k: 'r', hi: '小鼻が広い', lo: '小鼻が細い' },
-  { r: 'nose', label: '鼻幅と口幅の比', sub: '小鼻幅 ÷ 口幅', f: N => dist(N[31], N[35]) / dist(N[48], N[54]), tol: .1, k: 'r', hi: '口に対して鼻が大きい', lo: '口に対して鼻が小さい' },
-  { r: 'nose', label: '鼻筋の割合', sub: '鼻根〜鼻先 ÷ 鼻の長さ', f: N => dist(N[27], N[30]) / dist(N[27], N[33]), tol: .07, k: 'r', hi: '鼻先が下に伸びている', lo: '鼻先が短い' },
-  { r: 'mouth', label: '口の横幅', sub: '口角〜口角', f: N => dist(N[48], N[54]), tol: .09, k: 'r', hi: '口が大きい', lo: '口が小さい' },
-  { r: 'mouth', label: '上唇の厚さ', sub: '÷ 口幅', f: N => dist(N[51], N[62]) / dist(N[48], N[54]), tol: .28, k: 'r', hi: '上唇が厚い', lo: '上唇が薄い' },
-  { r: 'mouth', label: '下唇の厚さ', sub: '÷ 口幅', f: N => dist(N[66], N[57]) / dist(N[48], N[54]), tol: .25, k: 'r', hi: '下唇が厚い', lo: '下唇が薄い' },
-  { r: 'mouth', label: '人中の長さ', sub: '鼻下〜上唇 ÷ 顔の高さ', f: N => (N[51].y - N[33].y) / faceH(N), tol: .18, k: 'r', hi: '鼻の下が長い', lo: '鼻の下が短い' },
-  { r: 'mouth', label: '口角の角度', sub: '＋ほど口角が上がる', f: N => deg(Math.atan2(mean(N, [62, 66]).y - mean(N, [48, 54]).y, dist(N[48], N[54]) / 2)), tol: 6, k: 'd', hi: '口角が上がっている', lo: '口角が下がっている' },
-  { r: 'mouth', label: '口〜あごの長さ', sub: '下唇〜あご先 ÷ 顔の高さ', f: N => (N[8].y - N[57].y) / faceH(N), tol: .1, k: 'r', hi: 'あご先が長い', lo: 'あご先が短い' },
+  { r: 'face', label: '顔の横幅', sub: '頬の最も広い位置', f: K => fw(K), tol: .09, k: 'r', hi: '顔の幅が広い' },
+  { r: 'face', label: '顔の縦横比', sub: '眉〜あご ÷ 顔幅', f: K => fh(K) / fw(K), tol: .08, k: 'r', hi: '面長' },
+  { r: 'face', label: 'エラの張り', sub: 'エラ幅 ÷ 顔幅', f: K => dist(K.g1, K.g2) / fw(K), tol: .05, k: 'r', hi: 'エラが張っている' },
+  { r: 'face', label: 'あごの幅', sub: '下あご幅 ÷ 顔幅', f: K => dist(K.j1, K.j2) / fw(K), tol: .07, k: 'r', hi: 'あごが広い' },
+  { r: 'face', label: 'あごの角度', sub: 'あご先の開き角', f: K => angAt(K.c1, K.chin, K.c2), tol: 9, k: 'd', hi: 'あご先が丸く広い' },
+  { r: 'face', label: '下顔面の長さ', sub: '鼻下〜あご ÷ 顔の高さ', f: K => (K.chin.y - K.sub.y) / fh(K), tol: .07, k: 'r', hi: '下顔面が長い' },
+  { r: 'face', mp: 1, label: 'こめかみの幅', sub: 'こめかみ幅 ÷ 顔幅', f: (K, N) => dist(N[127], N[356]) / fw(K), tol: .05, k: 'r', hi: 'こめかみ・額が広い' },
+  { r: 'face', mp: 1, label: '頬骨の位置', sub: '頬の最大幅の高さ ÷ 顔の高さ', f: K => (avg(K.f1.y, K.f2.y) - K.browY) / fh(K), tol: .2, k: 'r', hi: '頬の張りが低い位置にある' },
+  { r: 'eyes', label: '目の横幅', sub: '目頭〜目尻（左右平均）', f: K => ew(K), tol: .08, k: 'r', hi: '目が横に大きい' },
+  { r: 'eyes', label: '目の開き', sub: '縦幅 ÷ 横幅', f: K => avg(dist(K.e1t, K.e1b) / ew1(K), dist(K.e2t, K.e2b) / ew2(K)), tol: .2, k: 'r', hi: '目がぱっちり開いている' },
+  { r: 'eyes', label: '目と目の間隔', sub: '目頭間 ÷ 目の横幅', f: K => dist(K.e1i, K.e2i) / ew(K), tol: .1, k: 'r', hi: '目の間隔が離れている' },
+  { r: 'eyes', label: '目尻の角度', sub: '＋ほどつり目', f: K => avg(deg(Math.atan2(K.e1i.y - K.e1o.y, K.e1i.x - K.e1o.x)), deg(Math.atan2(K.e2i.y - K.e2o.y, K.e2o.x - K.e2i.x))), tol: 5, k: 'd', hi: 'つり目寄り' },
+  { r: 'eyes', label: '左右の目の大きさの差', sub: '差 ÷ 平均', f: K => Math.abs(ew1(K) - ew2(K)) / ew(K), tol: .08, k: 'a', hi: '左右の目の大きさの差が大きい' },
+  { r: 'eyes', mp: 1, label: '黒目の大きさ', sub: '虹彩の直径 ÷ 目の横幅', f: (K, N) => avg(dist(N[469], N[471]), dist(N[474], N[476])) / ew(K), tol: .1, k: 'r', hi: '黒目が大きく見える' },
+  { r: 'eyes', mp: 1, label: '目の彫りの深さ', sub: '眉と目の奥行きの差（立体推定）', f: K => avg(K.e1t.z - K.b1m.z, K.e2t.z - K.b2m.z), tol: .06, k: 'a', hi: '目元の彫りが深い' },
+  { r: 'brows', label: '眉の長さ', sub: '眉頭〜眉尻', f: K => bl(K), tol: .09, k: 'r', hi: '眉が長い' },
+  { r: 'brows', label: '眉と目の距離', sub: '眉の中央〜上まぶた', f: K => avg(K.e1t.y - K.b1m.y, K.e2t.y - K.b2m.y), tol: .2, k: 'r', hi: '眉と目が離れている' },
+  { r: 'brows', label: '眉のアーチ', sub: '山の高さ ÷ 長さ', f: K => avg(perp(K.b1m, K.b1o, K.b1i), perp(K.b2m, K.b2i, K.b2o)) / bl(K), tol: .4, k: 'r', hi: '眉が弧を描いている' },
+  { r: 'brows', label: '眉の角度', sub: '＋ほど眉尻が上がる', f: K => avg(deg(Math.atan2(K.b1i.y - K.b1o.y, K.b1i.x - K.b1o.x)), deg(Math.atan2(K.b2i.y - K.b2o.y, K.b2o.x - K.b2i.x))), tol: 6, k: 'd', hi: '眉尻が上がっている' },
+  { r: 'brows', label: '眉間の広さ', sub: '眉頭どうしの距離', f: K => dist(K.b1i, K.b2i), tol: .16, k: 'r', hi: '眉間が広い' },
+  { r: 'brows', mp: 1, label: '眉の太さ', sub: '眉の上下幅 ÷ 長さ', f: (K, N) => avg(dist(N[105], N[52]), dist(N[334], N[282])) / bl(K), tol: .2, k: 'r', hi: '眉が太い' },
+  { r: 'nose', label: '鼻の長さ', sub: '鼻根〜鼻下 ÷ 顔の高さ', f: K => dist(K.nas, K.sub) / fh(K), tol: .08, k: 'r', hi: '鼻が長い' },
+  { r: 'nose', label: '小鼻の幅', sub: '小鼻の両端', f: K => dist(K.a1, K.a2), tol: .1, k: 'r', hi: '小鼻が広い' },
+  { r: 'nose', label: '鼻幅と口幅の比', sub: '小鼻幅 ÷ 口幅', f: K => dist(K.a1, K.a2) / mw(K), tol: .1, k: 'r', hi: '口に対して鼻が大きい' },
+  { r: 'nose', label: '鼻先の位置', sub: '鼻根〜鼻先 ÷ 鼻の長さ', f: K => dist(K.nas, K.tip) / dist(K.nas, K.sub), tol: .07, k: 'r', hi: '鼻先が下に伸びている' },
+  { r: 'nose', mp: 1, label: '鼻の高さ', sub: '頬に対する鼻先の突き出し（立体推定）', f: K => avg(K.f1.z, K.f2.z) - K.tip.z, tol: .15, k: 'r', hi: '鼻が高い' },
+  { r: 'nose', mp: 1, label: '鼻筋の幅', sub: '目頭の高さでの鼻の幅 ÷ 小鼻幅', f: (K, N) => dist(N[193], N[417]) / dist(K.a1, K.a2), tol: .12, k: 'r', hi: '鼻筋が太い' },
+  { r: 'mouth', label: '口の横幅', sub: '口角〜口角', f: K => mw(K), tol: .09, k: 'r', hi: '口が大きい' },
+  { r: 'mouth', label: '上唇の厚さ', sub: '÷ 口幅', f: K => dist(K.lt, K.lui) / mw(K), tol: .28, k: 'r', hi: '上唇が厚い' },
+  { r: 'mouth', label: '下唇の厚さ', sub: '÷ 口幅', f: K => dist(K.lli, K.lb) / mw(K), tol: .25, k: 'r', hi: '下唇が厚い' },
+  { r: 'mouth', label: '人中の長さ', sub: '鼻下〜上唇 ÷ 顔の高さ', f: K => (K.lt.y - K.sub.y) / fh(K), tol: .18, k: 'r', hi: '鼻の下が長い' },
+  { r: 'mouth', label: '口角の角度', sub: '＋ほど口角が上がる', f: K => deg(Math.atan2(mid2(K.lui, K.lli).y - mid2(K.m1, K.m2).y, mw(K) / 2)), tol: 6, k: 'd', hi: '口角が上がっている' },
+  { r: 'mouth', label: '口〜あごの長さ', sub: '下唇〜あご先 ÷ 顔の高さ', f: K => (K.chin.y - K.lb.y) / fh(K), tol: .1, k: 'r', hi: 'あご先が長い' },
+  { r: 'mouth', mp: 1, label: '上唇の山', sub: 'M字の深さ ÷ 口幅', f: (K, N) => (N[0].y - mid2(N[37], N[267]).y) / mw(K), tol: .5, k: 'r', hi: '上唇の山がはっきりしている' },
 ];
 const REGIONS = [
-  { key: 'face', name: '輪郭', idx: range(0, 17), w: .25 },
-  { key: 'eyes', name: '目', idx: range(36, 48), w: .22 },
-  { key: 'brows', name: '眉', idx: range(17, 27), w: .15 },
-  { key: 'nose', name: '鼻', idx: range(27, 36), w: .18 },
-  { key: 'mouth', name: '口', idx: range(48, 68), w: .20 },
+  { key: 'face', name: '輪郭', w: .25 }, { key: 'eyes', name: '目', w: .22 }, { key: 'brows', name: '眉', w: .15 },
+  { key: 'nose', name: '鼻', w: .18 }, { key: 'mouth', name: '口', w: .20 },
 ];
 
 function featureScore(m, a, b) {
-  let x;
-  if (m.k === 'd') x = Math.abs(a - b) / m.tol;
-  else if (m.k === 'a') x = Math.abs(a - b) / m.tol;
-  else x = Math.abs(a - b) / ((Math.abs(a) + Math.abs(b)) / 2 || 1) / m.tol;
+  const x = m.k === 'r' ? Math.abs(a - b) / ((Math.abs(a) + Math.abs(b)) / 2 || 1) / m.tol : Math.abs(a - b) / m.tol;
   return 100 * Math.exp(-x * x);
 }
-// similarity Procrustes: returns rms residual (in units of region RMS size) and transform B->A
+// similarity Procrustes: rms residual (in units of the region's RMS size) and the mapping B -> A
 function procrustes(A, B) {
   const n = A.length, ca = mean(A, range(0, n)), cb = mean(B, range(0, n));
   const a = A.map(p => ({ x: p.x - ca.x, y: p.y - ca.y })), b = B.map(p => ({ x: p.x - cb.x, y: p.y - cb.y }));
   const sa = Math.sqrt(a.reduce((s, p) => s + p.x * p.x + p.y * p.y, 0) / n), sb = Math.sqrt(b.reduce((s, p) => s + p.x * p.x + p.y * p.y, 0) / n);
   let num = 0, den = 0;
-  for (let i = 0; i < n; i++) { const ax = a[i].x / sa, ay = a[i].y / sa, bx = b[i].x / sb, by = b[i].y / sb; num += bx * ay - by * ax; den += bx * ax + by * ay; }
+  for (let i = 0; i < n; i++) { num += b[i].x * a[i].y - b[i].y * a[i].x; den += b[i].x * a[i].x + b[i].y * a[i].y; }
   const phi = Math.atan2(num, den), c = Math.cos(phi), s = Math.sin(phi);
-  let err = 0;
   const map = p => { const x = (p.x - cb.x) / sb, y = (p.y - cb.y) / sb; return { x: (x * c - y * s) * sa + ca.x, y: (x * s + y * c) * sa + ca.y }; };
+  let err = 0;
   for (let i = 0; i < n; i++) { const q = map(B[i]); err += ((q.x - A[i].x) ** 2 + (q.y - A[i].y) ** 2) / (sa * sa); }
   return { rms: Math.sqrt(err / n), map };
 }
 const shapeScore = rms => 100 * Math.exp(-((rms / .085) ** 2));
-const aiFromDist = d => 100 / (1 + Math.exp((d - 0.6) * 10));
+const dlibScore = d => 100 / (1 + Math.exp((d - 0.6) * 10));
+const arcScore = c => 100 / (1 + Math.exp(-(c - 0.28) * 14));
 const tier = v => v >= 75 ? ['c-good', 'よく似ている'] : v >= 55 ? ['c-mid', 'やや似ている'] : v >= 35 ? ['c-mid', 'あまり似ていない'] : ['c-bad', '似ていない'];
 const colorOf = v => v >= 75 ? css('--good') : v >= 45 ? css('--mid') : css('--bad');
+const fmt = (m, v) => m.k === 'd' ? v.toFixed(1) + '°' : v.toFixed(3);
 
-function fmt(m, v) { return m.k === 'd' ? v.toFixed(1) + '°' : v.toFixed(3); }
+const HINTS = {
+  rec: {
+    arc: 'InsightFace MobileFaceNet。約 60 万人分の新しいデータセットで学習した 512 次元モデルで、アジア人の顔の見分けも比較的得意です。',
+    dlib: 'face-api.js 付属の dlib 系 ResNet。欧米人中心のデータで学習した 128 次元モデルで、東アジア人どうしは高めに出やすい傾向があります。',
+    avg: '2 つのモデルのスコアを平均します。モデルごとのクセを打ち消したいときに。',
+  },
+  lm: {
+    mp: 'Google MediaPipe の 478 点メッシュ。虹彩・眉の太さ・鼻の高さ（立体推定）なども測れます。',
+    fa: 'face-api.js の 68 点。昔からある標準的な配置です。',
+  },
+};
+function pick(kind, v) {
+  set[kind] = v;
+  document.querySelectorAll(`[data-${kind}]`).forEach(b => b.setAttribute('aria-pressed', b.dataset[kind] === v));
+  $(kind + 'Hint').textContent = HINTS[kind][v];
+  renderSlot('a'); renderSlot('b'); update();
+}
+// which landmark set to use for a pair: 478-point only when both images have it
+function lmModel() { return set.lm === 'mp' && S.a?.mp && S.b?.mp ? 'mp' : 'fa'; }
 
 /* ---------- compare ---------- */
 let last = null;
 function update() {
-  const ready = S.a?.det && S.b?.det;
+  const ready = S.a?.fa && S.b?.fa;
   $('results').hidden = !ready; $('placeholder').hidden = !!ready;
   if (!ready) { last = null; return; }
-  const NA = S.a.norm, NB = S.b.norm;
+  const model = lmModel();
+  const PA = model === 'mp' ? S.a.mp : S.a.fa.pts, PB = model === 'mp' ? S.b.mp : S.b.fa.pts;
+  const NA = normalize(PA, model), NB = normalize(PB, model), KA = keypoints(NA, model), KB = keypoints(NB, model);
+  const REG = model === 'mp' ? MP_REG : FA_REG;
 
-  const rows = MEASURES.map(m => { const a = m.f(NA), b = m.f(NB); return { m, a, b, s: featureScore(m, a, b) }; });
+  const rows = MEASURES.filter(m => !m.mp || model === 'mp').map(m => { const a = m.f(KA, NA), b = m.f(KB, NB); return { m, a, b, s: featureScore(m, a, b) }; });
   const regs = REGIONS.map(R => {
     const fs = rows.filter(r => r.m.r === R.key), fmean = avg(...fs.map(r => r.s));
-    const pr = procrustes(R.idx.map(i => NA[i]), R.idx.map(i => NB[i])), ss = shapeScore(pr.rms);
-    return { ...R, rows: fs, fmean, ss, rms: pr.rms, score: .55 * fmean + .45 * ss };
+    const pr = procrustes(REG[R.key].map(i => NA[i]), REG[R.key].map(i => NB[i])), ss = shapeScore(pr.rms);
+    return { ...R, rows: fs, fmean, ss, rms: pr.rms, n: REG[R.key].length, score: .55 * fmean + .45 * ss };
   });
   const geo = regs.reduce((s, r) => s + r.score * r.w, 0);
-  const d = faceapi.euclideanDistance(S.a.det.desc, S.b.det.desc), ai = aiFromDist(d);
-  const total = .6 * ai + .4 * geo;
-  last = { rows, regs, geo, ai, d, total };
 
-  // verdict
+  const dD = faceapi.euclideanDistance(S.a.fa.desc, S.b.fa.desc), dlib = dlibScore(dD);
+  const cos = S.a.emb && S.b.emb ? S.a.emb.reduce((s, v, i) => s + v * S.b.emb[i], 0) : null, arc = cos === null ? null : arcScore(cos);
+  let rec = set.rec, ai;
+  if (rec !== 'dlib' && arc === null) rec = 'dlib';
+  ai = rec === 'arc' ? arc : rec === 'avg' ? (arc + dlib) / 2 : dlib;
+  const total = .6 * ai + .4 * geo;
+  last = { model, NA, NB, PA, PB };
+
   const [cls, word] = tier(total);
   $('total').innerHTML = `${total.toFixed(1)}<sup>%</sup>`; $('total').className = 'num ' + cls;
   $('verdictPill').textContent = word; $('verdictPill').className = 'pill ' + cls;
@@ -456,28 +653,61 @@ function update() {
   $('verdictText').textContent = `いちばん似ているのは「${best[0].name}」(${best[0].score.toFixed(0)}%)、いちばん違うのは「${worst.name}」(${worst.score.toFixed(0)}%) です。` +
     (ai - geo > 20 ? ' 顔全体の印象は似ていますが、パーツの形には差があります。' : geo - ai > 20 ? ' パーツの形は近いものの、顔全体の印象は離れています。' : '');
   $('aiScore').textContent = ai.toFixed(1) + '%'; $('aiScore').style.color = colorOf(ai);
-  $('aiDist').textContent = `特徴ベクトル距離 ${d.toFixed(3)}（0.6 未満で同一人物と判定されやすい）`;
+  $('aiSub').textContent = { arc: 'InsightFace', dlib: 'dlib', avg: 'InsightFace と dlib の平均' }[rec] + (rec !== set.rec ? '（InsightFace の準備中のため代用）' : '');
   $('geoScore').textContent = geo.toFixed(1) + '%'; $('geoScore').style.color = colorOf(geo);
+  $('geoSub').textContent = `ランドマーク ${model === 'mp' ? 478 : 68} 点・計測 ${rows.length} 項目` + (model !== set.lm ? '（478 点の準備中のため 68 点で計算）' : '');
 
   $('regions').innerHTML = regs.map(r => `<div class="reg"><div class="n">${r.name}</div><div class="v" style="color:${colorOf(r.score)}">${r.score.toFixed(0)}<span style="font-size:.55em">%</span></div><div class="bar"><b style="width:${r.score}%;background:${colorOf(r.score)}"></b></div><div class="sub" style="margin-top:6px">寸法 ${r.fmean.toFixed(0)} ・ 形 ${r.ss.toFixed(0)}</div></div>`).join('');
   drawRadar(regs);
 
-  // lists
-  const sorted = [...rows].sort((p, q) => q.s - p.s);
-  const regName = k => REGIONS.find(R => R.key === k).name;
-  $('simList').innerHTML = sorted.slice(0, 5).map(r => `<li><span class="sc" style="color:${colorOf(r.s)}">${r.s.toFixed(0)}</span><div><div class="t">${regName(r.m.r)} ・ ${r.m.label}</div><div class="d">A ${fmt(r.m, r.a)} ／ B ${fmt(r.m, r.b)}。ほぼ同じ${r.m.k === 'd' ? '角度' : '比率'}です</div></div></li>`).join('');
-  $('difList').innerHTML = sorted.slice(-5).reverse().map(r => {
-    const who = r.a > r.b ? 'A' : 'B';
-    return `<li><span class="sc" style="color:${colorOf(r.s)}">${r.s.toFixed(0)}</span><div><div class="t">${regName(r.m.r)} ・ ${r.m.label}</div><div class="d">${who} の方が${r.m.hi}（A ${fmt(r.m, r.a)} ／ B ${fmt(r.m, r.b)}）</div></div></li>`;
-  }).join('');
+  const mrow = (key, name, desc, v) => `<div class="mrow"><div class="mn">${name}${rec === key || (rec === 'avg' && v !== null) ? '<em>' + (rec === 'avg' ? '平均に使用' : '使用中') + '</em>' : ''}</div><div class="md">${desc}</div><div class="mv" style="color:${v === null ? css('--muted') : colorOf(v)}">${v === null ? '--' : v.toFixed(1) + '%'}</div>${v === null ? '' : `<div class="bar"><b style="width:${v}%;background:${colorOf(v)}"></b></div>`}</div>`;
+  $('modelRows').innerHTML =
+    mrow('arc', 'InsightFace MobileFaceNet', cos === null ? (ENG.arc === 'err' ? 'このブラウザでは動かせませんでした' : '準備中…') : `コサイン類似度 ${cos.toFixed(3)}（0.3〜0.4 以上で同一人物と判定されやすい）`, arc) +
+    mrow('dlib', 'dlib ResNet（face-api.js）', `特徴ベクトル距離 ${dD.toFixed(3)}（0.6 未満で同一人物と判定されやすい）`, dlib);
+  for (const k of ['a', 'b']) {
+    const cv = $('crop' + k.toUpperCase()), x = cv.getContext('2d');
+    x.clearRect(0, 0, 112, 112); if (S[k].crop) x.drawImage(S[k].crop, 0, 0);
+  }
 
-  // ledger
+  const sorted = [...rows].sort((p, q) => q.s - p.s), regName = k => REGIONS.find(R => R.key === k).name;
+  const tag = m => m.mp ? '<span class="new">478点</span>' : '';
+  $('simList').innerHTML = sorted.slice(0, 5).map(r => `<li><span class="sc" style="color:${colorOf(r.s)}">${r.s.toFixed(0)}</span><div><div class="t">${regName(r.m.r)} ・ ${r.m.label}${tag(r.m)}</div><div class="d">A ${fmt(r.m, r.a)} ／ B ${fmt(r.m, r.b)}。ほぼ同じ${r.m.k === 'd' ? '角度' : '値'}です</div></div></li>`).join('');
+  $('difList').innerHTML = sorted.slice(-5).reverse().map(r => `<li><span class="sc" style="color:${colorOf(r.s)}">${r.s.toFixed(0)}</span><div><div class="t">${regName(r.m.r)} ・ ${r.m.label}${tag(r.m)}</div><div class="d">${r.a > r.b ? 'A' : 'B'} の方が${r.m.hi}（A ${fmt(r.m, r.a)} ／ B ${fmt(r.m, r.b)}）</div></div></li>`).join('');
+
+  const bar = v => `<span class="bar"><b style="width:${v}%;background:${colorOf(v)}"></b></span><span style="font-family:var(--f-mono)">${v.toFixed(0)}</span>`;
   $('ledger').innerHTML = regs.map(R => `<tr class="grp"><td colspan="5">${R.name}<span class="n2" style="color:${colorOf(R.score)}">${R.score.toFixed(1)}%</span></td></tr>` +
-    R.rows.map(r => `<tr><td>${r.m.label}<span class="sub">${r.m.sub}</span></td><td class="n va">${fmt(r.m, r.a)}</td><td class="n vb">${fmt(r.m, r.b)}</td><td class="n">${r.m.k === 'd' ? (r.a - r.b).toFixed(1) + '°' : ((r.a - r.b) >= 0 ? '+' : '') + (r.a - r.b).toFixed(3)}</td><td><span class="bar"><b style="width:${r.s}%;background:${colorOf(r.s)}"></b></span><span style="font-family:var(--f-mono)">${r.s.toFixed(0)}</span></td></tr>`).join('') +
-    `<tr><td>${R.name}全体の形の一致<span class="sub">プロクラステス残差 ${R.rms.toFixed(3)}</span></td><td class="n"></td><td class="n"></td><td class="n"></td><td><span class="bar"><b style="width:${R.ss}%;background:${colorOf(R.ss)}"></b></span><span style="font-family:var(--f-mono)">${R.ss.toFixed(0)}</span></td></tr>`
+    R.rows.map(r => `<tr><td>${r.m.label}${tag(r.m)}<span class="sub">${r.m.sub}</span></td><td class="n va">${fmt(r.m, r.a)}</td><td class="n vb">${fmt(r.m, r.b)}</td><td class="n">${((r.a - r.b) >= 0 ? '+' : '') + (r.m.k === 'd' ? (r.a - r.b).toFixed(1) + '°' : (r.a - r.b).toFixed(3))}</td><td>${bar(r.s)}</td></tr>`).join('') +
+    `<tr><td>${R.name}全体の形の一致<span class="sub">${R.n} 点のプロクラステス残差 ${R.rms.toFixed(3)}</span></td><td class="n"></td><td class="n"></td><td class="n"></td><td>${bar(R.ss)}</td></tr>`
   ).join('');
 
   drawBlend(); drawShape();
+}
+
+/* ---------- drawing ---------- */
+function strokeEdges(ctx, P, edges, color, w) {
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
+  ctx.beginPath(); for (const [i, j] of edges) { ctx.moveTo(P[i].x, P[i].y); ctx.lineTo(P[j].x, P[j].y); } ctx.stroke();
+}
+function dots(ctx, P, idx, color, r) {
+  ctx.fillStyle = color; ctx.beginPath();
+  for (const i of idx) { ctx.moveTo(P[i].x + r, P[i].y); ctx.arc(P[i].x, P[i].y, r, 0, 7); }
+  ctx.fill();
+}
+function renderSlot(k) {
+  const K = k.toUpperCase(), s = S[k], cv = $('cv' + K);
+  $('drop' + K).classList.toggle('has', !!s); $('empty' + K).hidden = !!s; cv.hidden = !s; $('clr' + K).hidden = !s;
+  refreshStat(k);
+  if (!s) return;
+  cv.width = s.canvas.width; cv.height = s.canvas.height;
+  const ctx = cv.getContext('2d'); ctx.drawImage(s.canvas, 0, 0);
+  if (!s.fa || !showLm) return;
+  const col = k === 'a' ? css('--a') : css('--b'), w = Math.max(1.2, s.fa.box.width / 170);
+  if (set.lm === 'mp' && s.mp) {
+    ctx.globalAlpha = .45; dots(ctx, s.mp, range(0, s.mp.length), '#fff', w * .55);
+    ctx.globalAlpha = 1; strokeEdges(ctx, s.mp, MP_EDGES, col, w);
+  } else {
+    strokeEdges(ctx, s.fa.pts, FA_EDGES, col, w); dots(ctx, s.fa.pts, range(0, 68), col, w * 1.1);
+  }
 }
 
 function drawRadar(regs) {
@@ -486,9 +716,8 @@ function drawRadar(regs) {
   let h = '';
   for (const lv of [25, 50, 75, 100]) h += `<polygon points="${regs.map((_, i) => pt(i, lv).join(',')).join(' ')}" fill="none" stroke="${css('--line')}" stroke-width="1"/>`;
   regs.forEach((_, i) => { const [x, y] = pt(i, 100); h += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${css('--line')}"/>`; });
-  [25, 50, 75].forEach(lv => h += `<text x="${cx + 4}" y="${cy - R * lv / 100 - 3}" font-size="10" fill="${css('--muted')}" style="fill:${css('--muted')};font-family:var(--f-mono)">${lv}</text>`);
-  const poly = regs.map((r, i) => pt(i, r.score).join(',')).join(' ');
-  h += `<polygon points="${poly}" fill="${css('--a-soft')}" stroke="${css('--ink')}" stroke-width="2" stroke-linejoin="round"/>`;
+  [25, 50, 75].forEach(lv => h += `<text x="${cx + 4}" y="${cy - R * lv / 100 - 3}" font-size="10" style="fill:${css('--muted')};font-family:var(--f-mono)">${lv}</text>`);
+  h += `<polygon points="${regs.map((r, i) => pt(i, r.score).join(',')).join(' ')}" fill="${css('--a-soft')}" stroke="${css('--ink')}" stroke-width="2" stroke-linejoin="round"/>`;
   regs.forEach((r, i) => {
     const [x, y] = pt(i, r.score); h += `<circle cx="${x}" cy="${y}" r="4.5" fill="${colorOf(r.score)}" stroke="${css('--surface')}" stroke-width="1.5"/>`;
     const [lx, ly] = pt(i, 124), anchor = Math.abs(lx - cx) < 8 ? 'middle' : lx > cx ? 'start' : 'end';
@@ -499,13 +728,11 @@ function drawRadar(regs) {
 
 function drawBlend() {
   if (!last) return;
-  const cv = $('blend'), ctx = cv.getContext('2d'), W = cv.width;
-  const A = S.a, B = S.b, [al, ar] = eyeCenters(A.det.pts), [bl, br] = eyeCenters(B.det.pts);
-  const eA = { x: (al.x + ar.x) / 2, y: (al.y + ar.y) / 2 }, eB = { x: (bl.x + br.x) / 2, y: (bl.y + br.y) / 2 };
-  const angA = Math.atan2(ar.y - al.y, ar.x - al.x), angB = Math.atan2(br.y - bl.y, br.x - bl.x);
-  const iodA = dist(al, ar), s = iodA / dist(bl, br);
-  // frame: eyes centered horizontally at 40% height, IOD = 30% of canvas, A upright
-  const k = W * 0.3 / iodA;
+  const cv = $('blend'), ctx = cv.getContext('2d'), W = cv.width, A = S.a, B = S.b;
+  const [al, ar] = eyeCentersOf(A.fa.pts, 'fa'), [bl2, br] = eyeCentersOf(B.fa.pts, 'fa');
+  const eA = mid2(al, ar), eB = mid2(bl2, br);
+  const angA = Math.atan2(ar.y - al.y, ar.x - al.x), angB = Math.atan2(br.y - bl2.y, br.x - bl2.x);
+  const iodA = dist(al, ar), s = iodA / dist(bl2, br), k = W * 0.3 / iodA;
   const placeA = () => { ctx.translate(W / 2, W * 0.4); ctx.scale(k, k); ctx.rotate(-angA); ctx.translate(-eA.x, -eA.y); };
   const placeB = () => { placeA(); ctx.translate(eA.x, eA.y); ctx.rotate(angA - angB); ctx.scale(s, s); ctx.translate(-eB.x, -eB.y); };
   const mix = $('mix').value / 100;
@@ -523,51 +750,55 @@ function drawBlend() {
     ctx.save(); placeA(); ctx.drawImage(A.canvas, 0, 0); ctx.restore();
     ctx.save(); ctx.globalCompositeOperation = 'difference'; placeB(); ctx.drawImage(B.canvas, 0, 0); ctx.restore();
   }
-  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
   ctx.font = '600 22px "IBM Plex Mono", monospace'; ctx.fillStyle = css('--a'); ctx.fillText('A', 14, 32);
   ctx.fillStyle = css('--b'); ctx.fillText('B', W - 30, 32);
 }
 
 function drawShape() {
   if (!last) return;
-  const cv = $('shape'), ctx = cv.getContext('2d'), W = cv.width;
-  const NA = S.a.norm, NB = S.b.norm, pr = procrustes(NA, NB), NB2 = NB.map(pr.map);
-  const all = [...NA, ...NB2], xs = all.map(p => p.x), ys = all.map(p => p.y);
+  const { model, NA, NB } = last, cv = $('shape'), ctx = cv.getContext('2d'), W = cv.width;
+  const keys = model === 'mp' ? MP_KEYS : range(0, 68), edges = model === 'mp' ? MP_EDGES : FA_EDGES;
+  const pr = procrustes(keys.map(i => NA[i]), keys.map(i => NB[i])), NB2 = NB.map(pr.map);
+  const xs = keys.flatMap(i => [NA[i].x, NB2[i].x]), ys = keys.flatMap(i => [NA[i].y, NB2[i].y]);
   const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
-  const sc = W * 0.84 / Math.max(maxX - minX, maxY - minY), ox = W / 2 - sc * (minX + maxX) / 2, oy = W / 2 - sc * (minY + maxY) / 2;
+  const sc = W * 0.86 / Math.max(maxX - minX, maxY - minY), ox = W / 2 - sc * (minX + maxX) / 2, oy = W / 2 - sc * (minY + maxY) / 2;
   const T = P => P.map(p => ({ x: ox + p.x * sc, y: oy + p.y * sc }));
-  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, W);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = css('--surface2'); ctx.fillRect(0, 0, W, W);
-  ctx.strokeStyle = css('--line'); ctx.lineWidth = 1;
-  for (let g = 0; g <= W; g += W / 12) { ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, W); ctx.moveTo(0, g); ctx.lineTo(W, g); ctx.stroke(); }
+  ctx.strokeStyle = css('--line'); ctx.lineWidth = 1; ctx.beginPath();
+  for (let g = 0; g <= W; g += W / 12) { ctx.moveTo(g, 0); ctx.lineTo(g, W); ctx.moveTo(0, g); ctx.lineTo(W, g); }
+  ctx.stroke();
   const TA = T(NA), TB = T(NB2);
-  ctx.strokeStyle = css('--muted'); ctx.globalAlpha = .5;
-  for (let i = 0; i < 68; i++) { ctx.beginPath(); ctx.moveTo(TA[i].x, TA[i].y); ctx.lineTo(TB[i].x, TB[i].y); ctx.stroke(); }
-  ctx.globalAlpha = .9; strokeContours(ctx, TA, css('--a'), 3, true);
-  strokeContours(ctx, TB, css('--b'), 3, true); ctx.globalAlpha = 1;
+  ctx.globalAlpha = .55; ctx.strokeStyle = css('--muted'); ctx.beginPath();
+  for (const i of keys) { ctx.moveTo(TA[i].x, TA[i].y); ctx.lineTo(TB[i].x, TB[i].y); }
+  ctx.stroke(); ctx.globalAlpha = .9;
+  const lw = model === 'mp' ? 2 : 3;
+  strokeEdges(ctx, TA, edges, css('--a'), lw); strokeEdges(ctx, TB, edges, css('--b'), lw);
+  if (model === 'fa') { dots(ctx, TA, keys, css('--a'), 3.3); dots(ctx, TB, keys, css('--b'), 3.3); }
+  ctx.globalAlpha = 1;
 }
 
 /* ---------- controls ---------- */
 setupSlot('a'); setupSlot('b');
-$('swap').addEventListener('click', () => {
-  [S.a, S.b] = [S.b, S.a];
-  const sa = $('statA').textContent, sb = $('statB').textContent;
-  renderSlot('a'); renderSlot('b');
-  setStat('a', S.a ? sb : '正面を向いた顔写真がおすすめです'); setStat('b', S.b ? sa : 'A と同じくらいの角度・表情だと精度が上がります');
-  update();
-});
+$('swap').addEventListener('click', () => { [S.a, S.b] = [S.b, S.a]; renderSlot('a'); renderSlot('b'); update(); });
 $('toggleLm').addEventListener('click', e => { showLm = !showLm; e.currentTarget.setAttribute('aria-pressed', showLm); renderSlot('a'); renderSlot('b'); });
+document.querySelectorAll('[data-rec]').forEach(b => b.addEventListener('click', () => pick('rec', b.dataset.rec)));
+document.querySelectorAll('[data-lm]').forEach(b => b.addEventListener('click', () => pick('lm', b.dataset.lm)));
 document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
   blendMode = b.dataset.mode; document.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === b)); drawBlend();
 }));
 $('mix').addEventListener('input', drawBlend);
-const mq = matchMedia('(prefers-color-scheme: dark)');
 const redraw = () => { renderSlot('a'); renderSlot('b'); update(); };
-mq.addEventListener?.('change', redraw);
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', redraw);
 new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-if (window.faceapi) loadModels();
-else $('mstat').innerHTML = '<span class="dot err"></span><span>顔認識ライブラリを読み込めませんでした</span>';
+$('recHint').textContent = HINTS.rec.arc; $('lmHint').textContent = HINTS.lm.mp;
+renderSlot('a'); renderSlot('b'); renderEngines();
+window.__lab = { S, ENG, set, pick, update };
+if (window.faceapi) loadFaceApi(); else { ENG.fa = 'err'; renderEngines(); }
+if (window.ort) loadArcFace(); else { ENG.arc = 'err'; renderEngines(); }
+loadMediaPipe();
 })();
 </script>
 </body>

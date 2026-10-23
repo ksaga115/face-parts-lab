@@ -1,0 +1,10 @@
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+# 比較に使った顔写真をうっかりコミットしないように
+samples/
+*.jpg
+*.jpeg
+*.png
+*.webp
